@@ -1,13 +1,13 @@
 import streamlit as st
 import openai
 
-# Set page configuration
+# Page config
 st.set_page_config(page_title="Mental Health Support Bot", layout="centered")
 
-# Load your OpenAI API key from Streamlit secrets
+# Load API key securely
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Basic rule-based emotion detection
+# Emotion detection (rule-based)
 def detect_emotion(text):
     emotions = {
         "happy": ["thank", "grateful", "great", "joy"],
@@ -21,20 +21,43 @@ def detect_emotion(text):
                 return emotion
     return "neutral"
 
-# UI header
+# Title & info
 st.title("🧠 Mental Health Support Bot")
 st.markdown("This anonymous AI-powered bot offers emotional support. "
             "Responses are trauma-sensitive and non-judgmental. 💬")
 
-# Initialize session state
+# Session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-if "message_count" not in st.session_state:
-    st.session_state.message_count = 0
+# Display past messages
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-# Show chat history
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown
+# Chat input
+prompt = st.chat_input("How are you feeling today?")
+if prompt:
+    user_emotion = detect_emotion(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            try:
+                completion = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": f"You are a trauma-informed therapist. Respond sensitively. The user feels {user_emotion}."},
+                        {"role": "user", "content": prompt},
+                    ]
+                )
+                reply = completion.choices[0].message.content
+                st.markdown(reply)
+                st.session_state.messages.append({"role": "assistant", "content": reply})
+            except Exception as e:
+                st.error(f"Something went wrong: {e}")
+
 
