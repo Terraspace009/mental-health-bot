@@ -1,13 +1,13 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 
-# Page config
+# Set page config
 st.set_page_config(page_title="Mental Health Support Bot", layout="centered")
 
-# Load API key securely
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# Initialize OpenAI client using the key from secrets
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# Emotion detection (rule-based)
+# Basic emotion detection
 def detect_emotion(text):
     emotions = {
         "happy": ["thank", "grateful", "great", "joy"],
@@ -21,43 +21,37 @@ def detect_emotion(text):
                 return emotion
     return "neutral"
 
-# Title & info
+# UI
 st.title("🧠 Mental Health Support Bot")
 st.markdown("This anonymous AI-powered bot offers emotional support. "
             "Responses are trauma-sensitive and non-judgmental. 💬")
 
-# Session state
+# Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display past messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
 # Chat input
-prompt = st.chat_input("How are you feeling today?")
-if prompt:
-    user_emotion = detect_emotion(prompt)
+if prompt := st.chat_input("How are you feeling today?"):
+    st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    emotion = detect_emotion(prompt)
+    system_instruction = f"You are a kind, trauma-sensitive therapist. The user feels {emotion}. Respond gently and supportively."
 
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            try:
-                completion = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": f"You are a trauma-informed therapist. Respond sensitively. The user feels {user_emotion}."},
-                        {"role": "user", "content": prompt},
-                    ]
-                )
-                reply = completion.choices[0].message.content
-                st.markdown(reply)
-                st.session_state.messages.append({"role": "assistant", "content": reply})
-            except Exception as e:
-                st.error(f"Something went wrong: {e}")
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    reply = response.choices[0].message.content
+    st.chat_message("assistant").markdown(reply)
+    st.session_state.messages.append({"role": "assistant", "content": reply})
 
 
