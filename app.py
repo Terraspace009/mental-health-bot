@@ -1,121 +1,65 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 
-<<<<<<< HEAD
-# Set page config
-st.set_page_config(page_title="Mental Health Support Bot", layout="centered")
+# Set Streamlit page configuration
+st.set_page_config(page_title="Dark Humour Bot", layout="centered")
 
-# Initialize OpenAI client using the key from secrets
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# Load API key from secrets
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Basic emotion detection
-=======
-# Page config
-st.set_page_config(page_title="Dreamy Support Bot", layout="centered")
-
-# OpenAI API key from secrets
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-# Detect emotion (basic rule-based)
->>>>>>> 54c4a3d (💫 Add dreamy UI to support bot)
-def detect_emotion(text):
-    emotions = {
-        "happy": ["thank", "grateful", "great", "joy", "okay"],
-        "sad": ["sad", "cry", "alone", "pain", "depressed"],
-        "angry": ["angry", "mad", "hate", "frustrated"],
-        "anxious": ["nervous", "worried", "anxious", "panic", "fear"],
-    }
-    for emotion, words in emotions.items():
-        if any(word in text.lower() for word in words):
-            return emotion
-    return "neutral"
-
-<<<<<<< HEAD
-# UI
-st.title("🧠 Mental Health Support Bot")
-st.markdown("This anonymous AI-powered bot offers emotional support. "
-            "Responses are trauma-sensitive and non-judgmental. 💬")
-
-# Chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-=======
-# Header UI
+# Title and description
 st.markdown("""
-    <h1 style='text-align: center; color: #A78BFA;'>💬 Dreamy Mental Health Support Bot</h1>
-    <p style='text-align: center; font-size: 18px; color: #71717A;'>
-        Float into a calm space. Type anything — I'm here for you. 🌙
+    <h1 style='text-align: center; color: #FF69B4;'>💀 Dark Humour Bot</h1>
+    <p style='text-align: center; font-size: 18px; color: #bbb;'>
+        Got a problem? I'm not here to help — just to roast it with style.<br>
+        Sarcasm, cynicism, and existential dread served fresh. 🖤
     </p>
-    <hr style='border-top: 1px solid #ccc;'/>
+    <hr style='border-top: 1px dashed #666;'/>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display history
->>>>>>> 54c4a3d (💫 Add dreamy UI to support bot)
+# Display chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Chat input
-<<<<<<< HEAD
-if prompt := st.chat_input("How are you feeling today?"):
-    st.chat_message("user").markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# Input field
+user_input = st.chat_input("Drop your darkest thought...")
 
-    emotion = detect_emotion(prompt)
-    system_instruction = f"You are a kind, trauma-sensitive therapist. The user feels {emotion}. Respond gently and supportively."
-
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    reply = response.choices[0].message.content
-    st.chat_message("assistant").markdown(reply)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-=======
-if user_input := st.chat_input("💌 How are you feeling today?"):
+if user_input:
+    # Display user's message
     st.chat_message("user").markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    emotion = detect_emotion(user_input)
-    sys_prompt = (
-        f"You are a soft, dreamy, trauma-sensitive AI friend. "
-        f"The user seems to feel '{emotion}'. Respond with warmth, comfort, and a little magic. "
-        f"Avoid clinical language. Use comforting tone."
-    )
-
+    # Generate GPT response
     with st.chat_message("assistant"):
-        with st.spinner("Sending gentle thoughts... 🌸"):
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": sys_prompt},
-                        {"role": "user", "content": user_input}
-                    ]
-                )
-                reply = response.choices[0].message.content
-                st.markdown(reply)
-                st.session_state.messages.append({"role": "assistant", "content": reply})
-            except Exception as e:
-                st.error(f"⚠️ Error: {e}")
+        with st.spinner("Cooking up something rude..."):
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": (
+                        "You're a dark humour AI chatbot. "
+                        "Reply with witty, sarcastic, or ironic comebacks. "
+                        "Use dry humour and cynicism. Do not give therapy advice. "
+                        "Avoid being cruel or offensive — just clever and darkly funny."
+                    )},
+                    {"role": "user", "content": user_input}
+                ]
+            )
+            reply = response.choices[0].message.content
+            st.markdown(reply)
+            st.session_state.messages.append({"role": "assistant", "content": reply})
 
-# Footer credit
+# Footer
 st.markdown("""
-    <hr style='border-top: 1px solid #eee;'/>
-    <p style='text-align: center; font-size: 14px; color: #bbb;'>
-        Made with 💜 by <a href='https://github.com/Terraspace009' target='_blank'>Aishwarya Shukla</a>
+    <hr style='border-top: 1px dashed #999;'/>
+    <p style='text-align: center; font-size: 13px; color: #666;'>
+        This bot is 92% sarcasm and 8% caffeine.<br>
+        Built by <a href='https://github.com/Terraspace009' target='_blank'>Aishwarya </a> 🖤
     </p>
 """, unsafe_allow_html=True)
-
->>>>>>> 54c4a3d (💫 Add dreamy UI to support bot)
 
 
