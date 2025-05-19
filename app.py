@@ -1,11 +1,10 @@
 import streamlit as st
-import openai
 from openai import OpenAI
 
-# Set page config at the top
+# Set Streamlit page configuration
 st.set_page_config(page_title="💀 Dark Humour Bot", layout="centered")
 
-# Use the new OpenAI client
+# Initialize OpenAI client
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Header
@@ -18,39 +17,38 @@ st.markdown("""
     <hr style='border-top: 1px dashed #4b5563; margin-bottom: 2rem;'/>
 """, unsafe_allow_html=True)
 
-# Session state
+# Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Show chat history
+# Display history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User input
+# Chat input
 user_input = st.chat_input("Drop your darkest thought...")
 
 if user_input:
-    # Show user message
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # Generate roast response
     with st.chat_message("assistant"):
         with st.spinner("Sharpening sarcasm..."):
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You're a dark humour assistant. Be witty, cynical, sarcastic, and brutally honest — never helpful."},
+                    {"role": "system", "content": (
+                        "You're a dark humour assistant. Be witty, sarcastic, cynical, and emotionally unavailable. "
+                        "Do not give therapy advice. Respond with clever and dark humour — never serious or sensitive."
+                    )},
                     *st.session_state.messages
                 ]
             )
             reply = response.choices[0].message.content.strip()
             st.markdown(reply)
-
-    # Save assistant message
-    st.session_state.messages.append({"role": "assistant", "content": reply})
+            st.session_state.messages.append({"role": "assistant", "content": reply})
 
 # Footer
 st.markdown("""
