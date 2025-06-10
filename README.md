@@ -31,6 +31,7 @@ ByteMe is a trauma-aware chatbot that blends emotional intelligence with dark hu
 
 ## 🧩 How It Works
 
+## 🧩 How It Works
 
 ```mermaid
 graph TD;
@@ -38,6 +39,7 @@ graph TD;
     EmotionDetector --> GPTResponse
     GPTResponse --> StreamlitUI
     StreamlitUI --> ResponseDisplay
+
 
 git clone https://github.com/Terraspace009/ByteMe.git
 cd ByteMe
